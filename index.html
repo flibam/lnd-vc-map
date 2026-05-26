@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LONDO Technology — Chaîne de valeur & flux</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#1B2A4A;--coral:#F16751;--coral-soft:#FDE8E4;--coral-deep:#C4442F;
+  --teal:#0D9B8A;--teal-soft:#E0F5F1;--blue:#2E6CC4;--blue-soft:#E4EEFA;
+  --bg:#F7F6F3;--card:#FFFFFF;--text:#1B2A4A;--text-secondary:#5E6B80;
+  --text-tertiary:#95A0B4;--border:#E5E2DB;--border-light:#F0EDE7;
+  --shadow-sm:0 1px 3px rgba(27,42,74,0.06);--shadow-md:0 4px 12px rgba(27,42,74,0.08);
+  --radius:10px;--radius-sm:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;}
+
+.header{background:var(--navy);padding:20px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.header-left{display:flex;align-items:center;gap:14px;}
+.logo-mark{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--coral),#F5845A);display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;font-size:16px;color:#fff;}
+.header-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;font-size:17px;color:#fff;letter-spacing:-0.3px;}
+.header-sub{font-size:12px;color:rgba(255,255,255,0.55);font-weight:400;margin-top:1px;}
+
+.toolbar{padding:14px 28px;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.toolbar-label{font-size:12px;color:var(--text-tertiary);font-weight:500;text-transform:uppercase;letter-spacing:0.5px;margin-right:4px;}
+.flux-btn{padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);background:transparent;color:var(--text-secondary);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s ease;display:flex;align-items:center;gap:6px;}
+.flux-btn:hover{border-color:var(--text-tertiary);}
+.flux-btn .dot{width:8px;height:8px;border-radius:50%;}
+.flux-btn.active-mat{background:var(--coral);color:#fff;border-color:var(--coral);}
+.flux-btn.active-info{background:var(--blue);color:#fff;border-color:var(--blue);}
+.flux-btn.active-fin{background:var(--teal);color:#fff;border-color:var(--teal);}
+.flux-btn.active-all{background:var(--navy);color:#fff;border-color:var(--navy);}
+.toolbar-hint{margin-left:auto;font-size:11px;color:var(--text-tertiary);display:flex;align-items:center;gap:4px;}
+
+.diagram-container{position:relative;padding:20px 16px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.diagram{position:relative;display:grid;grid-template-columns:148px 158px 165px 155px 148px 165px;gap:12px;min-width:1000px;padding:0 4px;}
+
+.svg-overlay{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:5;}
+
+.col-header{padding:9px 8px;text-align:center;border-radius:var(--radius-sm);font-size:11px;font-weight:500;letter-spacing:0.2px;color:var(--text-secondary);background:var(--border-light);border:1px solid var(--border);margin-bottom:6px;line-height:1.3;}
+.col-header.londo{background:var(--navy);color:#fff;border-color:var(--navy);}
+.col-header .col-sub{font-size:9.5px;font-weight:400;opacity:0.65;display:block;margin-top:1px;}
+
+/* Group labels within columns */
+.group-label{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-tertiary);padding:6px 0 3px;margin-top:4px;border-bottom:1px solid var(--border-light);}
+.group-label:first-of-type{margin-top:0;}
+
+.node-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;cursor:pointer;transition:all 0.2s ease;position:relative;z-index:2;}
+.node-card:hover{border-color:var(--navy);box-shadow:var(--shadow-sm);transform:translateY(-1px);}
+.node-card.selected{border-color:var(--coral);box-shadow:0 0 0 2px rgba(241,103,81,0.2),var(--shadow-md);transform:translateY(-1px);}
+.node-card.dimmed{opacity:0.3;transform:none;}
+.node-card .n-title{font-size:11.5px;font-weight:500;color:var(--text);line-height:1.3;}
+.node-card .n-sub{font-size:10px;color:var(--text-tertiary);margin-top:2px;line-height:1.3;}
+.node-card.londo-node{background:linear-gradient(135deg,#F0FBE8,#E4F5D6);border-color:#8DC05C;}
+.node-card.londo-node .n-title{color:#2B5A0A;}
+.node-card.londo-node .n-sub{color:#4A7A22;}
+.node-card.londo-node.selected{border-color:#5A9A20;box-shadow:0 0 0 2px rgba(90,154,32,0.25),var(--shadow-md);}
+.node-card.client-node{border-left:3px solid var(--coral);}
+.node-card.n2-node{border-left:3px solid var(--border);}
+.node-card.warn-node{border-left:3px solid #E6A817;}
+.node-card.partner-node{border-left:3px solid #8B5E2F;}
+.node-card.sales-node{border-left:3px solid #7B61C4;}
+
+@keyframes flow-fwd{to{stroke-dashoffset:-16;}}
+@keyframes flow-bwd{to{stroke-dashoffset:16;}}
+.flow-path{fill:none;stroke-linecap:round;stroke-dasharray:8 5;transition:opacity 0.25s ease,stroke-width 0.2s ease;}
+.flow-path.animated-fwd{animation:flow-fwd 0.8s linear infinite;}
+.flow-path.animated-bwd{animation:flow-bwd 0.8s linear infinite;}
+.flow-path.type-mat{stroke:var(--coral);}
+.flow-path.type-info{stroke:var(--blue);}
+.flow-path.type-fin{stroke:var(--teal);}
+
+.overlay-backdrop{position:fixed;inset:0;background:rgba(27,42,74,0.06);z-index:100;opacity:0;pointer-events:none;transition:opacity 0.3s ease;}
+.overlay-backdrop.open{opacity:1;pointer-events:auto;}
+.slideover{position:fixed;top:0;right:0;bottom:0;width:640px;min-width:340px;max-width:90vw;background:var(--card);z-index:101;transform:translateX(100%);transition:transform 0.3s cubic-bezier(0.16,1,0.3,1);display:flex;flex-direction:column;box-shadow:-12px 0 40px rgba(27,42,74,0.18),-2px 0 8px rgba(27,42,74,0.08);border-left:1px solid var(--border);}
+.slideover.open{transform:translateX(0);}
+.slideover.no-transition{transition:none!important;}
+/* Resize handle */
+.so-resize{position:absolute;left:0;top:0;bottom:0;width:6px;cursor:ew-resize;z-index:10;background:transparent;transition:background 0.15s;}
+.so-resize:hover,.so-resize.dragging{background:rgba(241,103,81,0.25);}
+.so-resize::after{content:'';position:absolute;left:2px;top:50%;transform:translateY(-50%);width:2px;height:32px;border-radius:2px;background:var(--border);}
+/* Header */
+.slideover-header{padding:18px 24px 0;border-bottom:none;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-shrink:0;}
+.slideover-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;font-size:16px;color:var(--text);line-height:1.3;}
+.slideover-role{font-size:11px;color:var(--text-tertiary);margin-top:3px;}
+.role-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:500;}
+.role-badge.n2{background:#F0EDE7;color:var(--text-secondary);}
+.role-badge.direct{background:#E4EEFA;color:#1A4D96;}
+.role-badge.londo{background:#E0F5E0;color:#2B5A0A;}
+.role-badge.distrib{background:#FFF3E0;color:#8B5E2F;}
+.role-badge.client{background:var(--coral-soft);color:var(--coral-deep);}
+.role-badge.enduser{background:#F0EDE7;color:var(--text-secondary);}
+.close-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-secondary);transition:all 0.15s;flex-shrink:0;}
+.close-btn:hover{background:var(--border-light);color:var(--text);}
+/* Tabs */
+.so-tabs{display:flex;gap:0;padding:14px 24px 0;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;}
+.so-tab{padding:9px 14px;font-size:12px;font-weight:500;color:var(--text-tertiary);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.15s;white-space:nowrap;display:flex;align-items:center;gap:5px;user-select:none;}
+.so-tab:hover{color:var(--text-secondary);}
+.so-tab.active{color:var(--text);border-bottom-color:var(--navy);}
+.so-tab .tab-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.so-tab .tab-count{font-size:10px;font-weight:600;padding:1px 6px;border-radius:8px;background:var(--border-light);color:var(--text-tertiary);}
+.so-tab.active .tab-count{background:var(--navy);color:#fff;}
+/* Body */
+.slideover-body{flex:1;overflow-y:auto;padding:0 0 32px;overscroll-behavior:contain;}
+.so-node-desc{padding:14px 20px 14px;font-size:12px;color:var(--text-secondary);line-height:1.65;border-bottom:1px solid var(--border);}
+/* Toolbar expand/collapse all */
+.so-toolbar{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--border-light);background:var(--bg);position:sticky;top:0;z-index:2;}
+.so-count-label{font-size:11px;color:var(--text-tertiary);font-weight:500;}
+.so-expand-btn{font-size:11px;font-weight:500;color:var(--blue);background:none;border:none;cursor:pointer;padding:4px 8px;border-radius:4px;transition:background 0.12s;}
+.so-expand-btn:hover{background:var(--blue-soft);}
+/* Entity groups */
+.so-groups{padding:12px 20px;display:flex;flex-direction:column;gap:8px;}
+.entity-group{border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;transition:box-shadow 0.15s;}
+.entity-group:hover{box-shadow:var(--shadow-sm);}
+.entity-header{display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;user-select:none;background:#EFEDE8;transition:background 0.12s;min-height:44px;}
+.entity-header:hover{background:#E5E2DB;}
+.entity-header:active{background:var(--border);}
+.entity-name{font-size:12px;font-weight:600;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.entity-badges{display:flex;gap:4px;flex-shrink:0;}
+.entity-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.entity-flux-count{font-size:10px;font-weight:500;padding:2px 7px;border-radius:10px;background:rgba(27,42,74,0.1);color:var(--text-secondary);flex-shrink:0;}
+.entity-chevron{color:var(--text-tertiary);font-size:11px;flex-shrink:0;transition:transform 0.2s;width:16px;text-align:center;}
+.entity-group.open .entity-chevron{transform:rotate(180deg);}
+.entity-body{display:none;border-top:1px solid var(--border-light);}
+.entity-group.open .entity-body{display:block;}
+/* Flux cards */
+.flux-card{padding:12px 14px;border-bottom:1px solid var(--border-light);background:var(--card);}
+.flux-card:last-child{border-bottom:none;}
+.flux-card-top{display:flex;align-items:center;gap:6px;margin-bottom:9px;}
+.flux-type-tag{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:0.2px;flex-shrink:0;}
+.flux-type-tag.mat{background:#FDE8E4;color:#9A2E15;}
+.flux-type-tag.info{background:#DDEEFF;color:#0E3E87;}
+.flux-type-tag.fin{background:#D6F5EF;color:#065A4D;}
+.flux-type-dot{width:6px;height:6px;border-radius:50%;}
+.flux-type-dot.mat{background:#F16751;}
+.flux-type-dot.info{background:#2E6CC4;}
+.flux-type-dot.fin{background:#0D9B8A;}
+/* Neutral badges: dark for source, medium for target */
+.flux-node-badge{padding:4px 10px;border-radius:5px;font-size:11px;font-weight:500;white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;line-height:1.3;}
+.flux-node-badge.src{background:#374151;color:#fff;}
+.flux-node-badge.tgt{background:#8896A8;color:#fff;}
+.flux-arrow-row{display:flex;align-items:center;gap:0;margin-bottom:9px;}
+.flux-artifact{font-size:11.5px;font-weight:500;color:var(--text);line-height:1.5;}
+/* Dashed connector — aligned with legend */
+.flux-connector{flex:1;display:flex;align-items:center;min-width:24px;padding:0 4px;}
+.flux-connector-line{flex:1;height:0;border-top-width:2px;border-top-style:dashed;}
+.flux-connector-line.mat{border-top-color:var(--coral);}
+.flux-connector-line.info{border-top-color:var(--blue);}
+.flux-connector-line.fin{border-top-color:var(--teal);}
+.flux-connector-head{width:0;height:0;flex-shrink:0;}
+.flux-connector-head.mat{border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:7px solid var(--coral);}
+.flux-connector-head.info{border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:7px solid var(--blue);}
+.flux-connector-head.fin{border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:7px solid var(--teal);}
+/* Artifact */
+.flux-artifact{font-size:11.5px;font-weight:500;color:var(--text);line-height:1.5;}
+.risk-section{margin:0 20px 12px;padding:12px 14px;background:#FFF8F0;border:1px solid #F5DCC3;border-radius:var(--radius-sm);}
+.risk-title{font-size:12px;font-weight:600;color:#8B5E2F;font-family:'Plus Jakarta Sans',sans-serif;margin-bottom:5px;}
+.risk-text{font-size:11px;color:#6B4520;line-height:1.55;}
+/* Legacy */
+.flow-section,.flow-section-header,.flow-icon,.flow-section-title,.flow-item,.flow-dir,.flow-target,.flow-desc,
+.flow-group,.flow-group-header,.flow-row,.flow-row-meta,.flow-arrow-visual,.flow-badge,.flow-line-wrap,
+.flow-line-svg,.flow-line-path,.flow-row-desc{display:none!important;}
+
+.legend-bar{padding:10px 28px;background:var(--card);border-top:1px solid var(--border);display:flex;gap:20px;flex-wrap:wrap;align-items:center;font-size:11px;color:var(--text-tertiary);}
+.legend-item{display:flex;align-items:center;gap:6px;}
+.legend-line{width:24px;height:0;border-top:2px dashed;}
+.legend-line.mat{border-color:var(--coral);}
+.legend-line.info{border-color:var(--blue);}
+.legend-line.fin{border-color:var(--teal);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div>
+      <div class="header-title">Cartographie de la chaîne de valeur & flux</div>
+      <div class="header-sub">LONDO Technology · Stanford Seed Transformation Program · Mai 2026</div>
+    </div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <span class="toolbar-label">Flux</span>
+  <button class="flux-btn" id="btn-all" onclick="setFilter('all')"><span class="dot" style="background:var(--navy)"></span>Tous</button>
+  <button class="flux-btn" id="btn-mat" onclick="setFilter('mat')"><span class="dot" style="background:var(--coral)"></span>Matières</button>
+  <button class="flux-btn" id="btn-info" onclick="setFilter('info')"><span class="dot" style="background:var(--blue)"></span>Information</button>
+  <button class="flux-btn" id="btn-fin" onclick="setFilter('fin')"><span class="dot" style="background:var(--teal)"></span>Financier</button>
+  <button class="flux-btn" id="btn-clear" onclick="clearSelection()" style="margin-left:8px;border-style:dashed;display:none;">✕ Réinitialiser</button>
+  <span class="toolbar-hint">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
+    Cliquer sur un acteur pour explorer ses flux
+  </span>
+</div>
+
+<div class="diagram-container" id="diagram-container">
+<div class="diagram" id="diagram">
+
+  <!-- COL 0 — N2 -->
+  <div class="col">
+    <div class="col-header">Fournisseur N2<span class="col-sub">Amont lointain</span></div>
+    <div class="group-label">Cloud & infra</div>
+    <div class="node-card n2-node" data-id="n2-google"><div class="n-title">Google LLC</div><div class="n-sub">Datacenters, câbles Equiano/2Africa</div></div>
+    <div class="node-card n2-node" data-id="n2-intel"><div class="n-title">Intel / AMD / NVIDIA</div><div class="n-sub">Processeurs et GPU serveurs cloud</div></div>
+    <div class="node-card n2-node" data-id="n2-akamai"><div class="n-title">Akamai Technologies</div><div class="n-sub">Propriétaire de Linode</div></div>
+    <div class="node-card n2-node" data-id="n2-linux"><div class="n-title">Linux Foundation</div><div class="n-sub">Kernel Linux — base hébergement</div></div>
+    <div class="node-card n2-node" data-id="n2-cables"><div class="n-title">Câbles ACE-SAT-3-2Africa</div><div class="n-sub">Connectivité Cameroun → cloud</div></div>
+    <div class="group-label">IA & logiciel</div>
+    <div class="node-card n2-node" data-id="n2-aws"><div class="n-title">AWS (Amazon)</div><div class="n-sub">Infrastructure cloud pour Anthropic</div></div>
+    <div class="node-card n2-node" data-id="n2-hetzner"><div class="n-title">Hetzner / OVH</div><div class="n-sub">Infra Contabo & Odoo SaaS</div></div>
+    <div class="group-label">Télécoms</div>
+    <div class="node-card n2-node" data-id="n2-mtn-congo"><div class="n-title">MTN / Airtel Congo</div><div class="n-sub">SMS en gros → Wirepick</div></div>
+  </div>
+
+  <!-- COL 1 — Fournisseurs directs -->
+  <div class="col">
+    <div class="col-header">Fournisseur direct<span class="col-sub">Côté offre</span></div>
+    <div class="group-label">Cloud & SaaS</div>
+    <div class="node-card" data-id="gcp"><div class="n-title">Google Cloud Platform</div><div class="n-sub">Hébergement principal</div></div>
+    <div class="node-card" data-id="linode"><div class="n-title">Linode · Contabo</div><div class="n-sub">VPS hébergement secondaire</div></div>
+    <div class="node-card" data-id="workspace"><div class="n-title">Google Workspace · O365</div><div class="n-sub">Email, collaboration, bureautique</div></div>
+    <div class="node-card" data-id="odoo"><div class="n-title">Odoo Enterprise</div><div class="n-sub">ERP · gestion projets · facturation</div></div>
+    <div class="node-card" data-id="atlassian"><div class="n-title">Atlassian Bitbucket</div><div class="n-sub">Dépôt Git · CI/CD pipelines</div></div>
+    <div class="node-card warn-node" data-id="wirepick"><div class="n-title">Wirepick Congo ⚠</div><div class="n-sub">SMS revendus à BCI Alerting</div></div>
+    <div class="node-card" data-id="postmark"><div class="n-title">Postmark</div><div class="n-sub">Emails transactionnels & notifs</div></div>
+    <div class="node-card" data-id="anthropic"><div class="n-title">Anthropic / Claude</div><div class="n-sub">IA générative · support R&D</div></div>
+    <div class="node-card" data-id="codeant"><div class="n-title">Codeant</div><div class="n-sub">Revue de code automatisée</div></div>
+    <div class="group-label">Production amont</div>
+    <div class="node-card" data-id="camtel"><div class="n-title">Camtel · MTN · Orange · Starlink</div><div class="n-sub">Connectivité internet bureaux</div></div>
+    <div class="node-card" data-id="eneo"><div class="n-title">ENEO · CAMWATER</div><div class="n-sub">Eau et électricité bureaux</div></div>
+    <div class="node-card" data-id="fiverr"><div class="n-title">Fiverr</div><div class="n-sub">Recrutement & missions freelances</div></div>
+    <div class="group-label">Corporate</div>
+    <div class="node-card warn-node" data-id="afriland"><div class="n-title">Afriland · Ecobank Cam. ⚠</div><div class="n-sub">Comptes bancaires LONDO</div></div>
+    <div class="node-card" data-id="brain"><div class="n-title">Brain Consulting</div><div class="n-sub">Conseil RH, comptabilité & fiscal</div></div>
+    <div class="group-label">Autres</div>
+    <div class="node-card" data-id="bailleur"><div class="n-title">Bailleur · Gardiennage</div><div class="n-sub">Locaux bd. Ahidjo · sécurité</div></div>
+    <div class="node-card" data-id="consultants"><div class="n-title">Consultants · freelances</div><div class="n-sub">Expertise · renfort ponctuel</div></div>
+  </div>
+
+  <!-- COL 2 — LONDO -->
+  <div class="col">
+    <div class="col-header londo">LONDO Technology<span class="col-sub">Producteur / Éditeur logiciel</span></div>
+    <div class="group-label">Pôle Banque</div>
+    <div class="node-card londo-node" data-id="londo-banque">
+      <div class="n-title">Pôle Banque</div>
+      <div class="n-sub">FlyBanking · EasyFly · GIMAC Pay · BCI Net/Online/Mbote · Alerting · BSCA RSCP · FOUTA · Monitoring</div>
+    </div>
+    <div class="group-label">Pôle Industrie</div>
+    <div class="node-card londo-node" data-id="londo-industrie">
+      <div class="n-title">Pôle Industrie</div>
+      <div class="n-sub">MyCIMENCam · MyCIMFIG · Fluid · SFA · SABITOU · Cadyst Grain · Panzani · SGMP · SGMC</div>
+    </div>
+  </div>
+
+  <!-- COL 3 — Distributeurs & Intermédiaires -->
+  <div class="col">
+    <div class="col-header">Distributeur / Interm.<span class="col-sub">Canaux & partenaires</span></div>
+    <div class="group-label">Distribution</div>
+    <div class="node-card" data-id="appstore"><div class="n-title">Apple App Store</div><div class="n-sub">Apps mobiles iOS</div></div>
+    <div class="node-card" data-id="playstore"><div class="n-title">Google Play Store</div><div class="n-sub">Apps mobiles Android</div></div>
+    <div class="node-card" data-id="api-direct"><div class="n-title">API directe / SI</div><div class="n-sub">Intégration bancaire & ERP</div></div>
+    <div class="group-label">Partenaires</div>
+    <div class="node-card partner-node" data-id="hmn"><div class="n-title">HMN Consulting</div><div class="n-sub">Intermédiaire juridique Congo</div></div>
+    <div class="node-card sales-node" data-id="apporteurs"><div class="n-title">Apporteurs d'affaires</div><div class="n-sub">~13% du CA · prospection</div></div>
+  </div>
+
+  <!-- COL 4 — Clients -->
+  <div class="col">
+    <div class="col-header">Client<span class="col-sub">Donneurs d'ordre</span></div>
+    <div class="group-label">Segment banque</div>
+    <div class="node-card client-node" data-id="bci"><div class="n-title">BCI Congo</div><div class="n-sub">FOUTA · Monitoring · Alerting</div></div>
+    <div class="node-card client-node" data-id="bsca"><div class="n-title">BSCA Bank</div><div class="n-sub">BSCA RSCP</div></div>
+    <div class="node-card client-node" data-id="afg"><div class="n-title">AFG Bank</div><div class="n-sub">EasyFly — conformité BEAC/COBAC</div></div>
+    <div class="node-card client-node" data-id="ecobank"><div class="n-title">ECM — Ecobank Cam.</div><div class="n-sub">Fly Banking</div></div>
+    <div class="node-card client-node" data-id="uba"><div class="n-title">UBA</div><div class="n-sub">GIMAC Pay</div></div>
+    <div class="group-label">Segment industrie</div>
+    <div class="node-card client-node" data-id="cimencam"><div class="n-title">CIMENCAM</div><div class="n-sub">MyCIMENCam · Fluid · SFA · SABITOU</div></div>
+    <div class="node-card client-node" data-id="cimfig"><div class="n-title">CIMFIG</div><div class="n-sub">MyCIMFIG</div></div>
+    <div class="node-card client-node" data-id="panzani-group"><div class="n-title">Panzani · SGMP · SGMC</div><div class="n-sub">Socle + spécificités</div></div>
+    <div class="node-card client-node" data-id="cadyst"><div class="n-title">Cadyst Group</div><div class="n-sub">Click Cadyst (SFA)</div></div>
+  </div>
+
+  <!-- COL 5 — Utilisateurs finaux -->
+  <div class="col">
+    <div class="col-header">Utilisateur final<span class="col-sub">Clients des clients</span></div>
+    <div class="group-label">Entreprises</div>
+    <div class="node-card" data-id="pme-cemac"><div class="n-title">PME et entreprises CEMAC</div><div class="n-sub">Services bancaires, virements</div></div>
+    <div class="node-card" data-id="commercants"><div class="n-title">Commerçants et marchands</div><div class="n-sub">Paiements interbancaires</div></div>
+    <div class="node-card" data-id="revendeurs"><div class="n-title">Revendeurs et détaillants</div><div class="n-sub">Réseaux distribution ciment</div></div>
+    <div class="node-card" data-id="transporteurs"><div class="n-title">Transporteurs et logisticiens</div><div class="n-sub">Bons de commande, feuilles route</div></div>
+    <div class="node-card" data-id="minoteries"><div class="n-title">Minoteries</div><div class="n-sub">Grandes surfaces, boulangeries</div></div>
+    <div class="node-card" data-id="interne-pilotage"><div class="n-title">CIMENCAM · Cadyst (interne)</div><div class="n-sub">Pilotage activité commerciale</div></div>
+    <div class="group-label">Particuliers</div>
+    <div class="node-card" data-id="titulaires"><div class="n-title">Détenteurs de comptes</div><div class="n-sub">BCI Online, Mbote, Alerting SMS</div></div>
+    <div class="node-card" data-id="voyageurs"><div class="n-title">Voyageurs professionnels</div><div class="n-sub">Justificatifs hors zone CEMAC</div></div>
+    <div class="node-card" data-id="gimac-users"><div class="n-title">Utilisateurs GIMAC Pay</div><div class="n-sub">Transactions interbancaires</div></div>
+  </div>
+
+</div><!-- /diagram -->
+
+<svg class="svg-overlay" id="svg-overlay">
+  <defs>
+    <marker id="ah-mat" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto"><path d="M1 1L7 4L1 7" fill="none" stroke="#F16751" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <marker id="ah-info" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto"><path d="M1 1L7 4L1 7" fill="none" stroke="#2E6CC4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <marker id="ah-fin" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto"><path d="M1 1L7 4L1 7" fill="none" stroke="#0D9B8A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  </defs>
+</svg>
+</div><!-- /diagram-container -->
+
+<div class="legend-bar">
+  <span style="font-weight:500;color:var(--text-secondary);">Légende :</span>
+  <span class="legend-item"><span class="legend-line mat"></span>Matières (code, infra, apps, compétences)</span>
+  <span class="legend-item"><span class="legend-line info"></span>Information (specs, SLA, rapports, données)</span>
+  <span class="legend-item"><span class="legend-line fin"></span>Financier (licences, factures, commissions, charges)</span>
+  <span style="margin-left:auto;font-size:10px;color:var(--text-tertiary);">→ sens du flux · flèche animée = direction · ⚠ dépendance critique</span>
+</div>
+
+<div class="overlay-backdrop" id="backdrop" onclick="closeSlideover()"></div>
+<div class="slideover" id="slideover">
+  <div class="so-resize" id="so-resize"></div>
+  <div class="slideover-header">
+    <div>
+      <div class="slideover-title" id="so-title"></div>
+      <div class="slideover-role" id="so-role"></div>
+    </div>
+    <button class="close-btn" onclick="closeSlideover()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="so-tabs" id="so-tabs"></div>
+  <div class="slideover-body" id="so-body"></div>
+</div>
+
+<script>
+const NODES = {
+  // N2
+  'n2-google':{title:'Google LLC',role:'Fournisseur N2',roleClass:'n2',col:0,desc:'Data centers physiques et câbles sous-marins Equiano et 2Africa. Infrastructure réseau mondiale qui supporte GCP.',risk:'Risque indirect critique. Panne Google = impact sur GCP = indisponibilité LONDO.'},
+  'n2-intel':{title:'Intel / AMD / NVIDIA',role:'Fournisseur N2',roleClass:'n2',col:0,desc:'Processeurs et GPU alimentant les serveurs des fournisseurs cloud.',risk:'Pénuries puces peuvent faire monter les coûts cloud.'},
+  'n2-akamai':{title:'Akamai Technologies',role:'Fournisseur N2',roleClass:'n2',col:0,desc:'Propriétaire de Linode depuis 2022 (Akamai Cloud Computing). Ses décisions stratégiques impactent Linode.',risk:'Changement de politique Akamai peut forcer une migration VPS.'},
+  'n2-linux':{title:'Linux Foundation',role:'Fournisseur N2',roleClass:'n2',col:0,desc:'Kernel Linux est la base de l\'hébergement cloud. Open source, maintenu par la fondation Linux.',risk:'CVE critiques sur le kernel doivent être patchés rapidement.'},
+  'n2-cables':{title:'Câbles ACE-SAT-3-2Africa',role:'Fournisseur N2',roleClass:'n2',col:0,desc:'Fibres optiques sous-marines reliant le Cameroun et l\'Afrique Centrale au réseau mondial. Connectivité physique fondamentale.',risk:'Coupure câble = indisponibilité totale potentielle. Redondance limitée en Afrique Centrale.'},
+  'n2-aws':{title:'AWS (Amazon)',role:'Fournisseur N2',roleClass:'n2',col:0,desc:'Amazon Web Services héberge les modèles Claude d\'Anthropic. Infrastructure sous-jacente à l\'API IA.',risk:'Flux indirect. Aucun levier de LONDO sur cette dépendance.'},
+  'n2-hetzner':{title:'Hetzner / OVH',role:'Fournisseur N2',roleClass:'n2',col:0,desc:'Fournisseurs d\'infrastructure cloud européens pour Contabo et Odoo Enterprise SaaS.',risk:'Risque indirect sur disponibilité Odoo et VPS backup.'},
+  'n2-mtn-congo':{title:'MTN / Airtel Congo',role:'Fournisseur N2',roleClass:'n2',col:0,desc:'Opérateurs télécoms au Congo-Brazzaville. Vendent des SMS en gros à Wirepick pour la terminaison mobile.',risk:'Tarification SMS opérateurs impacte la marge LONDO sur le service Alerting BCI.'},
+
+  // Fournisseurs directs
+  'gcp':{title:'Google Cloud Platform',role:'Fournisseur direct · Cloud',roleClass:'direct',col:1,desc:'Hébergement principal de Fly Banking et de toutes les APIs bancaires. VMs, stockage, Kubernetes, bases de données managées.',risk:'Maillon le plus critique côté offre. Aucun cloud alternatif activé. Single point of failure.'},
+  'linode':{title:'Linode · Contabo',role:'Fournisseur direct · Cloud',roleClass:'direct',col:1,desc:'VPS d\'hébergement secondaire. Backup de GCP pour certains services non-critiques.',risk:'Bon réflexe. À renforcer pour la résilience si incident GCP.'},
+  'workspace':{title:'Google Workspace · Office 365',role:'Fournisseur direct · SaaS',roleClass:'direct',col:1,desc:'Outils de collaboration et de communication interne : email, agenda, drive, visioconférence.',risk:'Dépendance quotidienne. Faible risque — double fournisseur (Google + Microsoft).'},
+  'odoo':{title:'Odoo Enterprise',role:'Fournisseur direct · ERP',roleClass:'direct',col:1,desc:'ERP pour gestion de projets, facturation clients, comptabilité. Migration depuis Sage en cours, non terminée.',risk:'Migration Sage→Odoo incomplète = double saisie et risque d\'erreurs. À finaliser en priorité.'},
+  'atlassian':{title:'Atlassian Bitbucket',role:'Fournisseur direct · Dev',roleClass:'direct',col:1,desc:'Dépôt Git pour le code source, pipelines CI/CD pour les builds et déploiements automatisés.',risk:'Standard industrie. Alternative GitHub disponible. Faible risque.'},
+  'wirepick':{title:'Wirepick Congo',role:'Fournisseur direct · SMS',roleClass:'direct',col:1,desc:'Revendeur de SMS transactionnels pour BCI Alerting. Achète en gros chez MTN Congo et Airtel Congo et revend à LONDO.',risk:'Dépendance critique unique pour les SMS Congo. Aucune alternative activée. Coupure = SLA BCI rompu.'},
+  'postmark':{title:'Postmark',role:'Fournisseur direct · Email',roleClass:'direct',col:1,desc:'Service d\'envoi d\'emails transactionnels et de notifications aux utilisateurs des applications bancaires et industrielles.',risk:'Dépendance importante pour les notifications critiques. Alternative à identifier.'},
+  'anthropic':{title:'Anthropic / Claude',role:'Fournisseur direct · IA',roleClass:'direct',col:1,desc:'API Claude (Sonnet/Opus) pour l\'IA générative — support R&D, architecture hybride DeepSeek/Claude en développement.',risk:'Usage croissant prévu. Budget API et politique de gouvernance IA à formaliser.'},
+  'codeant':{title:'Codeant',role:'Fournisseur direct · Qualité',roleClass:'direct',col:1,desc:'Outil de revue de code automatisée. Analyse la qualité du code source et détecte les problèmes.',risk:'Outil de productivité. Faible risque de dépendance.'},
+  'camtel':{title:'Camtel · MTN · Orange · Starlink',role:'Fournisseur direct · Connectivité',roleClass:'direct',col:1,desc:'Connectivité internet des bureaux LONDO à Douala (Bonamoussadi). Starlink = lien de secours.',risk:'Multi-fournisseurs = bonne résilience. Starlink sécurise la continuité.'},
+  'eneo':{title:'ENEO · CAMWATER',role:'Fournisseur direct · Utilities',roleClass:'direct',col:1,desc:'Eau et électricité pour les bureaux LONDO à Douala. Fournitures essentielles au fonctionnement quotidien.',risk:'Délestages ENEO fréquents au Cameroun. Groupe électrogène ou UPS à vérifier.'},
+  'fiverr':{title:'Fiverr',role:'Fournisseur direct · Talent',roleClass:'direct',col:1,desc:'Plateforme de recrutement de freelances pour des missions ponctuelles. Source de talents techniques externalisés.',risk:'Qualité variable. Vetting des profils avant mission critique.'},
+  'afriland':{title:'Afriland · Ecobank Cam.',role:'Fournisseur direct · Banque',roleClass:'direct',col:1,desc:'Banques partenaires de LONDO pour ses comptes courants et opérations bancaires. Pas de ligne de crédit activée.',risk:'Absence de ligne de crédit = fragilité financière en cas de besoin de trésorerie. Priorité : obtenir un découvert ou une ligne de crédit (dossier bancaire 250M FCFA en cours).'},
+  'brain':{title:'Brain Consulting',role:'Fournisseur direct · Conseil',roleClass:'direct',col:1,desc:'Cabinet de conseil en RH, comptabilité et fiscal. Accompagne LONDO sur les questions juridiques et sociales.',risk:'Dépendance sur une expertise clé. Assurer une relation continue.'},
+  'bailleur':{title:'Bailleur · Gardiennage',role:'Fournisseur direct · Locaux',roleClass:'direct',col:1,desc:'Propriétaire des locaux boulevard Ahidjo à Douala et prestataire de gardiennage. Fourniture des espaces de travail.',risk:'Renouvellement de bail à anticiper. Sécurisation des locaux importante.'},
+  'consultants':{title:'Consultants · freelances',role:'Fournisseur direct · Expertise',roleClass:'direct',col:1,desc:'Experts externes (CTO fractionnaire envisagé — Brice Jean, formateurs). Freelances intervenus ponctuellement en renfort, rarement sur les projets eux-mêmes.',risk:'Dépendance faible mais risque de perte de connaissance si consultant clé part sans transfert.'},
+
+  // LONDO
+  'londo-banque':{title:'LONDO — Pôle Banque',role:'LONDO Technology',roleClass:'londo',col:2,desc:'FlyBanking, EasyFly, GIMAC Pay, BCI Net/Online/Mbote, Alerting, BSCA RSCP, FOUTA, Monitoring. Principal centre de revenu LONDO.',risk:'6 clients bancaires actifs. Churn d\'un seul = impact significatif. Renouvellements à sécuriser. SLA applicatifs = risque de plainte.'},
+  'londo-industrie':{title:'LONDO — Pôle Industrie',role:'LONDO Technology',roleClass:'londo',col:2,desc:'MyCIMENCam, MyCIMFIG, Fluid, SFA (SABITOU), Cadyst Grain, Panzani, SGMP, SGMC. Applications métier pour les groupes industriels CEMAC.',risk:'Concentration sur CIMENCAM/Vicat historiquement. Cadyst Group diversifie. Potentiel de croissance fort sur ce segment.'},
+
+  // Distributeurs
+  'appstore':{title:'Apple App Store',role:'Distributeur',roleClass:'distrib',col:3,desc:'Distribution des applications iOS Fly Banking, EasyFly et autres aux utilisateurs finaux des banques.',risk:'Validation Apple peut bloquer une mise à jour critique. Anticiper les review cycles.'},
+  'playstore':{title:'Google Play Store',role:'Distributeur',roleClass:'distrib',col:3,desc:'Distribution des applications Android — canal principal en zone CEMAC (pénétration Android >85%).',risk:'Canal critique. Changements politique Google Play à surveiller.'},
+  'api-direct':{title:'API directe / SI',role:'Distributeur',roleClass:'distrib',col:3,desc:'Intégration directe des modules LONDO dans le SI bancaire ou industriel via API REST. Pas d\'intermédiaire de distribution.',risk:'Complexité d\'intégration côté client peut rallonger les projets. Marges 100% préservées.'},
+  'hmn':{title:'HMN Consulting',role:'Intermédiaire juridique',roleClass:'distrib',col:3,desc:'Société basée à Brazzaville (Congo). Intermédiaire juridique actuel entre LONDO et CIMENCAM. LONDO n\'a pas de relation contractuelle directe avec CIMENCAM à date — tout passe par HMN.',risk:'Dépendance juridique critique. Si HMN fait défaut, la relation CIMENCAM est à risque. Frais bancaires et commissions réduisent la marge. Sécuriser par un contrat de sauvegarde.'},
+  'apporteurs':{title:'Apporteurs d\'affaires',role:'Intermédiaire commercial',roleClass:'distrib',col:3,desc:'Réseau d\'apporteurs qui identifient des opportunités, font des introductions et parfois transmettent des informations sur les budgets alloués. ~13% du CA LONDO.',risk:'13% CA = canal significatif. La relation client est-elle capturée après l\'introduction ? Les accords sont-ils formalisés et protègent-ils LONDO si l\'apporteur change de camp ?'},
+
+  // Clients
+  'bci':{title:'BCI Congo',role:'Client',roleClass:'client',col:4,desc:'Banque Commerciale Internationale (Congo-Brazzaville). Client historique. FOUTA (app mobile), Alerting SMS, Monitoring en production.',risk:'SLA applicatifs critiques. Retards de paiement constatés. Relation à consolider.'},
+  'bsca':{title:'BSCA Bank',role:'Client',roleClass:'client',col:4,desc:'Banque Sociétaire de Crédit et d\'Affaires. Utilise BSCA RSCP — module de gestion de réseau.',risk:'Client actif à fidéliser. Potentiel cross-sell à explorer.'},
+  'afg':{title:'AFG Bank',role:'Client',roleClass:'client',col:4,desc:'EasyFly déployé pour la conformité BEAC/COBAC — gestion des justificatifs de voyage hors zone CEMAC.',risk:'Client récent. Potentiel d\'extension sur d\'autres modules.'},
+  'ecobank':{title:'ECM — Ecobank Cameroun',role:'Client',roleClass:'client',col:4,desc:'Fly Banking déployé. Relation stratégique : Brice Jean (Head IT Ecobank CEMAC) est le CTO fractionnaire envisagé pour LONDO.',risk:'Double casquette Brice Jean (client + CTO fract.) = conflit d\'intérêt potentiel. À gérer avec précaution.'},
+  'uba':{title:'UBA',role:'Client',roleClass:'client',col:4,desc:'United Bank for Africa. GIMAC Pay déployé pour les paiements interbancaires.',risk:'Renouvellement contrat à confirmer. Potentiel de cross-sell.'},
+  'cimencam':{title:'CIMENCAM',role:'Client',roleClass:'client',col:4,desc:'Cimenteries du Cameroun (Groupe Vicat). MyCIMENCam, Fluid, SFA, SABITOU. Relation passant par HMN Consulting juridiquement.',risk:'Plainte sur disponibilité applicative déjà reçue. Client exigeant. Relation à consolider via HMN.'},
+  'cimfig':{title:'CIMFIG',role:'Client',roleClass:'client',col:4,desc:'Cimenterie de Figuil. MyCIMFIG déployé. Entité du même groupe que CIMENCAM.',risk:'Extension cross-sell possible sur autres modules industrie.'},
+  'panzani-group':{title:'Panzani · SGMP · SGMC',role:'Client',roleClass:'client',col:4,desc:'Clients industrie agro-alimentaire et distribution. Modules LONDO déployés sur socle commun avec spécificités par entité.',risk:'Clients en développement. Potentiel de croissance sur le segment agro.'},
+  'cadyst':{title:'Cadyst Group',role:'Client',roleClass:'client',col:4,desc:'Client pour Click Cadyst — application SFA (Sales Force Automation) de gestion commerciale terrain.',risk:'Client récent à développer. Cross-sell potentiel sur autres outils SFA et reporting.'},
+
+  // Utilisateurs finaux
+  'pme-cemac':{title:'PME et entreprises CEMAC',role:'Utilisateur final',roleClass:'enduser',col:5,desc:'Entreprises de la zone CEMAC utilisant les services bancaires digitaux via les banques clientes de LONDO.',risk:'Satisfaction = rétention bancaire = revenu LONDO. Feedback indirect mais essentiel.'},
+  'commercants':{title:'Commerçants et marchands',role:'Utilisateur final',roleClass:'enduser',col:5,desc:'Commerçants utilisant GIMAC Pay pour les paiements interbancaires dans la zone CEMAC.',risk:'Adoption marchands = levier de croissance pour les banques clientes.'},
+  'revendeurs':{title:'Revendeurs et détaillants',role:'Utilisateur final',roleClass:'enduser',col:5,desc:'Réseau de distribution ciment et produits agro. Utilisent les apps LONDO (SFA, commandes) déployées par CIMENCAM.',risk:'Adoption faible terrain = valeur nulle pour CIMENCAM. Formation et UX critiques.'},
+  'transporteurs':{title:'Transporteurs et logisticiens',role:'Utilisateur final',roleClass:'enduser',col:5,desc:'Transporteurs utilisant les bons de commande et feuilles de route générés via les applications LONDO.',risk:'Usage terrain dépend de la connectivité mobile en zone rurale.'},
+  'minoteries':{title:'Minoteries',role:'Utilisateur final',roleClass:'enduser',col:5,desc:'Grandes surfaces et boulangeries dans le réseau de distribution CIMENCAM et groupes agro.',risk:'Clients finaux stratégiques pour CIMENCAM. Leur satisfaction impacte indirectement LONDO.'},
+  'interne-pilotage':{title:'CIMENCAM · Cadyst (interne)',role:'Utilisateur final',roleClass:'enduser',col:5,desc:'Les équipes internes CIMENCAM et Cadyst utilisent les outils LONDO pour piloter leur activité commerciale et analyser les données terrain.',risk:'Usage interne = argument de rétention fort. Intégration profonde = switching cost élevé.'},
+  'titulaires':{title:'Détenteurs de comptes',role:'Utilisateur final',roleClass:'enduser',col:5,desc:'Clients des banques utilisant BCI Online, Mbote, alertes SMS. Transactions quotidiennes via mobile.',risk:'UX dégradée → plaintes banque → risque résiliation contrat LONDO. Feedback indirect critique.'},
+  'voyageurs':{title:'Voyageurs professionnels',role:'Utilisateur final',roleClass:'enduser',col:5,desc:'Utilisateurs d\'EasyFly pour les justificatifs de voyage hors zone CEMAC — conformité BEAC/COBAC.',risk:'Réglementation BEAC = driver d\'adoption. Évolutions réglementaires à suivre.'},
+  'gimac-users':{title:'Utilisateurs GIMAC Pay',role:'Utilisateur final',roleClass:'enduser',col:5,desc:'Particuliers et entreprises effectuant des transactions interbancaires via GIMAC Pay.',risk:'Croissance du portefeuille GIMAC = croissance indirecte LONDO via banques clientes.'},
+};
+
+const FLOWS = [
+  // N2 → Direct
+  {from:'n2-google',to:'gcp',type:'mat',label:'Data centers physiques, réseau mondial sous-jacent à GCP'},
+  {from:'n2-intel',to:'gcp',type:'mat',label:'CPU/GPU des serveurs cloud GCP'},
+  {from:'n2-intel',to:'linode',type:'mat',label:'Processeurs serveurs VPS Linode/Contabo'},
+  {from:'n2-akamai',to:'linode',type:'mat',label:'Contrôle stratégique — Akamai propriétaire de Linode'},
+  {from:'n2-linux',to:'gcp',type:'mat',label:'Kernel Linux base de l\'infrastructure cloud'},
+  {from:'n2-cables',to:'camtel',type:'mat',label:'Câbles sous-marins → connectivité opérateurs locaux Cameroun'},
+  {from:'n2-aws',to:'anthropic',type:'mat',label:'Infrastructure cloud AWS hébergeant les modèles Claude'},
+  {from:'n2-hetzner',to:'linode',type:'mat',label:'Infrastructure data centers pour Contabo'},
+  {from:'n2-hetzner',to:'odoo',type:'mat',label:'Infrastructure cloud hébergeant Odoo Enterprise SaaS'},
+  {from:'n2-mtn-congo',to:'wirepick',type:'mat',label:'SMS en gros achetés chez MTN/Airtel Congo, revendus par Wirepick'},
+
+  // Direct → LONDO
+  {from:'gcp',to:'londo-banque',type:'mat',label:'VMs, stockage, Kubernetes — hébergement Fly Banking et APIs bancaires'},
+  {from:'gcp',to:'londo-industrie',type:'mat',label:'Hébergement applications industrie (MyCIMENCam, SGMP…)'},
+  {from:'londo-banque',to:'gcp',type:'fin',label:'Facture mensuelle cloud en USD — dépense variable critique'},
+  {from:'londo-banque',to:'gcp',type:'info',label:'Logs applicatifs, métriques de performance, alertes monitoring'},
+  {from:'linode',to:'londo-banque',type:'mat',label:'VPS hébergement secondaire (backup GCP)'},
+  {from:'londo-banque',to:'linode',type:'fin',label:'Abonnement mensuel VPS'},
+  {from:'workspace',to:'londo-banque',type:'mat',label:'Email professionnel, agenda, stockage, visioconférence'},
+  {from:'londo-banque',to:'workspace',type:'fin',label:'Licences mensuelles Google Workspace / O365'},
+  {from:'wirepick',to:'londo-banque',type:'mat',label:'SMS transactionnels livrés pour BCI Alerting'},
+  {from:'wirepick',to:'londo-banque',type:'info',label:'Rapports de livraison SMS, taux d\'échec, statuts de terminaison'},
+  {from:'londo-banque',to:'wirepick',type:'fin',label:'Facturation au volume SMS — marge LONDO sur la revente BCI'},
+  {from:'postmark',to:'londo-banque',type:'mat',label:'Delivery d\'emails transactionnels et notifications applicatives'},
+  {from:'londo-banque',to:'postmark',type:'fin',label:'Abonnement Postmark au volume'},
+  {from:'anthropic',to:'londo-banque',type:'mat',label:'API Claude (Sonnet/Opus) — IA générative pour R&D et produits'},
+  {from:'londo-banque',to:'anthropic',type:'fin',label:'Paiement usage API au token'},
+  {from:'odoo',to:'londo-banque',type:'mat',label:'Service ERP — gestion projets, facturation, comptabilité LONDO'},
+  {from:'odoo',to:'londo-banque',type:'info',label:'Données financières, projets, factures centralisées dans Odoo'},
+  {from:'londo-banque',to:'odoo',type:'fin',label:'Licence annuelle Odoo Enterprise'},
+  {from:'atlassian',to:'londo-banque',type:'mat',label:'Dépôt code source Git, pipelines CI/CD automatisés'},
+  {from:'londo-banque',to:'atlassian',type:'fin',label:'Licence SaaS mensuelle Bitbucket'},
+  {from:'codeant',to:'londo-banque',type:'mat',label:'Analyse automatisée du code source — rapports qualité et sécurité'},
+  {from:'londo-banque',to:'codeant',type:'fin',label:'Abonnement Codeant'},
+  {from:'camtel',to:'londo-banque',type:'mat',label:'Connectivité internet bureaux Douala (multi-opérateurs + Starlink)'},
+  {from:'londo-banque',to:'camtel',type:'fin',label:'Abonnements mensuels opérateurs télécoms'},
+  {from:'eneo',to:'londo-banque',type:'mat',label:'Électricité et eau pour les bureaux LONDO à Douala'},
+  {from:'londo-banque',to:'eneo',type:'fin',label:'Factures ENEO et CAMWATER mensuelles'},
+  {from:'fiverr',to:'consultants',type:'mat',label:'Marché de talents freelances accessibles pour missions ponctuelles'},
+  {from:'consultants',to:'londo-banque',type:'mat',label:'Expertise technique, architecture, renfort ponctuel (rarement sur projets)'},
+  {from:'consultants',to:'londo-banque',type:'info',label:'Recommandations, supports de formation, transfert de compétences'},
+  {from:'londo-banque',to:'consultants',type:'fin',label:'Honoraires mission / formation / conseil'},
+  {from:'londo-banque',to:'fiverr',type:'fin',label:'Paiement missions freelances via la plateforme'},
+  {from:'afriland',to:'londo-banque',type:'mat',label:'Services bancaires (comptes courants, virements, opérations)'},
+  {from:'afriland',to:'londo-banque',type:'info',label:'Relevés bancaires, notifications de transaction, reporting financier'},
+  {from:'londo-banque',to:'afriland',type:'fin',label:'Frais bancaires, commissions — aucune ligne de crédit activée à ce jour'},
+  {from:'brain',to:'londo-banque',type:'mat',label:'Conseil RH, comptabilité, fiscal — accompagnement juridique et social'},
+  {from:'londo-banque',to:'brain',type:'fin',label:'Honoraires Brain Consulting'},
+  {from:'bailleur',to:'londo-banque',type:'mat',label:'Locaux bd. Ahidjo Douala + service de gardiennage'},
+  {from:'londo-banque',to:'bailleur',type:'fin',label:'Loyer mensuel + frais gardiennage'},
+
+  // LONDO → Distrib
+  {from:'londo-banque',to:'appstore',type:'mat',label:'Applications iOS compilées (Fly Banking, EasyFly, GIMAC Pay…)'},
+  {from:'londo-banque',to:'playstore',type:'mat',label:'Applications Android compilées — canal principal CEMAC'},
+  {from:'londo-banque',to:'api-direct',type:'mat',label:'Modules et APIs intégrés dans le SI bancaire'},
+  {from:'londo-industrie',to:'api-direct',type:'mat',label:'Modules industrie livrés via API (MyCIMENCam, Click Cadyst)'},
+  {from:'appstore',to:'londo-banque',type:'info',label:'Reviews utilisateurs, crash reports, stats téléchargements'},
+  {from:'playstore',to:'londo-banque',type:'info',label:'Analytics Android, crash reports, données Play Console'},
+
+  // Distrib → Clients
+  {from:'appstore',to:'bci',type:'mat',label:'App FOUTA iOS distribuée aux clients BCI Congo'},
+  {from:'playstore',to:'bci',type:'mat',label:'App FOUTA Android — canal principal'},
+  {from:'appstore',to:'ecobank',type:'mat',label:'Fly Banking iOS pour clients Ecobank'},
+  {from:'playstore',to:'ecobank',type:'mat',label:'Fly Banking Android pour clients Ecobank'},
+  {from:'appstore',to:'afg',type:'mat',label:'EasyFly iOS pour conformité BEAC/COBAC'},
+  {from:'playstore',to:'afg',type:'mat',label:'EasyFly Android'},
+  {from:'appstore',to:'uba',type:'mat',label:'GIMAC Pay iOS pour clients UBA'},
+  {from:'playstore',to:'uba',type:'mat',label:'GIMAC Pay Android'},
+  {from:'playstore',to:'bsca',type:'mat',label:'BSCA RSCP Android'},
+  {from:'api-direct',to:'bci',type:'mat',label:'Monitoring et alerting intégrés au SI BCI'},
+  {from:'api-direct',to:'ecobank',type:'mat',label:'APIs Fly Banking intégrées au SI Ecobank'},
+  {from:'api-direct',to:'cimfig',type:'mat',label:'MyCIMFIG intégré au SI CIMFIG'},
+  {from:'api-direct',to:'panzani-group',type:'mat',label:'Modules SGMP, SGMC, Panzani intégrés'},
+  {from:'api-direct',to:'cadyst',type:'mat',label:'Click Cadyst (SFA) intégré au SI Cadyst Group'},
+
+  // HMN → CIMENCAM (intermédiaire juridique)
+  {from:'londo-industrie',to:'hmn',type:'mat',label:'Livrables logiciels transmis à HMN (MyCIMENCam, Fluid, SFA, SABITOU)'},
+  {from:'londo-industrie',to:'hmn',type:'info',label:'Factures, notes de version, rapports techniques adressés à HMN'},
+  {from:'hmn',to:'cimencam',type:'mat',label:'Services LONDO redistribués à CIMENCAM par HMN'},
+  {from:'hmn',to:'cimencam',type:'info',label:'Facturation et documentation transmises à CIMENCAM'},
+  {from:'cimencam',to:'hmn',type:'fin',label:'Paiement des contrats CIMENCAM versé à HMN Consulting'},
+  {from:'hmn',to:'londo-industrie',type:'fin',label:'Paiement reversé à LONDO, net de commissions HMN et frais bancaires'},
+  {from:'cimencam',to:'hmn',type:'info',label:'Cahiers des charges et demandes évolution relayés via HMN'},
+  {from:'hmn',to:'londo-industrie',type:'info',label:'Specs et besoins CIMENCAM transmis à LONDO par HMN'},
+
+  // Apporteurs d'affaires
+  {from:'apporteurs',to:'londo-banque',type:'mat',label:'Introductions, mises en relation avec décideurs bancaires'},
+  {from:'apporteurs',to:'londo-industrie',type:'mat',label:'Introductions auprès de prospects industrie'},
+  {from:'apporteurs',to:'londo-banque',type:'info',label:'Informations sur budgets alloués, contexte prospect, timing décisionnel'},
+  {from:'londo-banque',to:'apporteurs',type:'info',label:'Présentations produit, pricing, références clients pour le pitch'},
+  {from:'londo-banque',to:'apporteurs',type:'fin',label:'Commissions sur deals signés (% contrat ou forfait)'},
+  {from:'londo-industrie',to:'apporteurs',type:'fin',label:'Commissions sur contrats industrie apportés'},
+
+  // Client ↔ LONDO (return flows)
+  {from:'bci',to:'londo-banque',type:'fin',label:'Licence + maintenance annuelle — revenu récurrent historique'},
+  {from:'bci',to:'londo-banque',type:'info',label:'Spécifications SLA, incidents, demandes d\'évolution'},
+  {from:'londo-banque',to:'bci',type:'info',label:'Notes de version, rapports d\'alerte, reporting réglementaire'},
+  {from:'bsca',to:'londo-banque',type:'fin',label:'Licence BSCA RSCP + maintenance'},
+  {from:'bsca',to:'londo-banque',type:'info',label:'Specs et demandes évolution BSCA'},
+  {from:'afg',to:'londo-banque',type:'fin',label:'Licence EasyFly AFG Bank'},
+  {from:'afg',to:'londo-banque',type:'info',label:'Exigences conformité BEAC/COBAC'},
+  {from:'ecobank',to:'londo-banque',type:'fin',label:'Licence Fly Banking Ecobank Cameroun'},
+  {from:'ecobank',to:'londo-banque',type:'info',label:'Specs conformité, demandes évolution, reporting Ecobank'},
+  {from:'uba',to:'londo-banque',type:'fin',label:'Licence GIMAC Pay UBA'},
+  {from:'uba',to:'londo-banque',type:'info',label:'Reporting GIMAC, demandes UBA'},
+  {from:'cimfig',to:'londo-industrie',type:'fin',label:'Contrat MyCIMFIG — licence et maintenance'},
+  {from:'cimfig',to:'londo-industrie',type:'info',label:'Spécifications CIMFIG'},
+  {from:'panzani-group',to:'londo-industrie',type:'fin',label:'Contrats Panzani, SGMP, SGMC'},
+  {from:'panzani-group',to:'londo-industrie',type:'info',label:'Specs métier agro-alimentaire et distribution'},
+  {from:'cadyst',to:'londo-industrie',type:'fin',label:'Contrat Click Cadyst — licence et maintenance'},
+  {from:'cadyst',to:'londo-industrie',type:'info',label:'Spécifications SFA, besoins métier Cadyst Group'},
+  {from:'londo-industrie',to:'cadyst',type:'info',label:'Données de vente terrain, analytics Click Cadyst'},
+
+  // Client → End users
+  {from:'bci',to:'titulaires',type:'mat',label:'BCI Online, Mbote, alertes SMS, virements'},
+  {from:'bci',to:'pme-cemac',type:'mat',label:'Services bancaires digitaux pour PME clientes de BCI'},
+  {from:'ecobank',to:'titulaires',type:'mat',label:'Fly Banking pour titulaires Ecobank'},
+  {from:'ecobank',to:'pme-cemac',type:'mat',label:'Services bancaires pour PME clientes'},
+  {from:'uba',to:'commercants',type:'mat',label:'GIMAC Pay pour commerçants du réseau UBA'},
+  {from:'uba',to:'gimac-users',type:'mat',label:'GIMAC Pay — transactions interbancaires'},
+  {from:'afg',to:'voyageurs',type:'mat',label:'EasyFly — justificatifs pour voyageurs hors zone CEMAC'},
+  {from:'cimencam',to:'revendeurs',type:'mat',label:'Outils SFA pour revendeurs et distributeurs ciment'},
+  {from:'cimencam',to:'transporteurs',type:'mat',label:'Bons de commande, feuilles de route via apps LONDO'},
+  {from:'cimencam',to:'minoteries',type:'mat',label:'Suivi commandes et livraisons pour minoteries'},
+  {from:'cimencam',to:'interne-pilotage',type:'mat',label:'Outils de pilotage activité commerciale interne CIMENCAM'},
+  {from:'cadyst',to:'revendeurs',type:'mat',label:'Click Cadyst pour revendeurs du réseau Cadyst'},
+  {from:'cadyst',to:'interne-pilotage',type:'mat',label:'Pilotage activité commerciale interne Cadyst Group'},
+  {from:'revendeurs',to:'cimencam',type:'info',label:'Données terrain : commandes, visites, géolocalisation'},
+  {from:'revendeurs',to:'cadyst',type:'info',label:'Données SFA terrain via Click Cadyst'},
+  {from:'titulaires',to:'bci',type:'info',label:'Transactions, feedbacks, tickets support'},
+  {from:'titulaires',to:'bci',type:'fin',label:'Frais bancaires → BCI paie LONDO (valeur indirecte)'},
+  {from:'gimac-users',to:'uba',type:'info',label:'Données transactions GIMAC Pay'},
+];
+
+// ======================== STATE ========================
+let selectedNode = null;
+let activeFilter = null;
+let nodeEls = {};
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.node-card[data-id]').forEach(el => {
+    const id = el.dataset.id;
+    nodeEls[id] = el;
+    el.addEventListener('click', () => toggleNode(id));
+  });
+  drawArrows();
+  window.addEventListener('resize', () => drawArrows());
+});
+
+function toggleNode(id) {
+  if (selectedNode === id) { selectedNode = null; closeSlideover(); }
+  else { selectedNode = id; openSlideover(id); }
+  updateUI();
+}
+
+function setFilter(type) {
+  activeFilter = (activeFilter === type) ? null : type;
+  updateUI();
+}
+
+function clearSelection() {
+  selectedNode = null; activeFilter = null; closeSlideover(); updateUI();
+}
+
+function updateUI() {
+  ['all','mat','info','fin'].forEach(t => {
+    const b = document.getElementById('btn-'+t);
+    b.className = 'flux-btn' + (activeFilter === t ? ' active-'+t : '');
+  });
+  document.getElementById('btn-clear').style.display = (selectedNode || activeFilter) ? '' : 'none';
+  document.querySelectorAll('.node-card[data-id]').forEach(el => {
+    el.classList.remove('selected','dimmed');
+    if (selectedNode) {
+      if (el.dataset.id === selectedNode) { el.classList.add('selected'); }
+      else {
+        const connected = FLOWS.some(f => (f.from===selectedNode&&f.to===el.dataset.id)||(f.to===selectedNode&&f.from===el.dataset.id));
+        if (!connected) el.classList.add('dimmed');
+      }
+    }
+  });
+  drawArrows();
+}
+
+function drawArrows() {
+  const svg = document.getElementById('svg-overlay');
+  const container = document.getElementById('diagram-container');
+  const cRect = container.getBoundingClientRect();
+  svg.style.width = container.scrollWidth+'px';
+  svg.style.height = container.scrollHeight+'px';
+  svg.setAttribute('viewBox',`0 0 ${container.scrollWidth} ${container.scrollHeight}`);
+  svg.querySelectorAll('.flow-path').forEach(p => p.remove());
+
+  const pairMap = {};
+  FLOWS.forEach((f,i) => {
+    const key = [f.from,f.to].sort().join('|');
+    if (!pairMap[key]) pairMap[key] = [];
+    pairMap[key].push(i);
+  });
+
+  FLOWS.forEach((f,idx) => {
+    const fromEl = nodeEls[f.from], toEl = nodeEls[f.to];
+    if (!fromEl || !toEl) return;
+
+    let opacity = 0, sw = 1, animated = false;
+    if (selectedNode) {
+      const isRelevant = (f.from===selectedNode||f.to===selectedNode);
+      const typeOk = !activeFilter || activeFilter==='all' || f.type===activeFilter;
+      if (isRelevant && typeOk) { opacity=0.9; sw=2; animated=true; }
+      else { opacity=0; }
+    } else if (activeFilter && activeFilter!=='all') {
+      opacity = (f.type===activeFilter) ? 0.5 : 0; sw=1.5; animated=true;
+    } else if (activeFilter==='all') {
+      opacity=0.22; sw=1;
+    } else { opacity=0; }
+    if (opacity===0) return;
+
+    const fromRect = fromEl.getBoundingClientRect();
+    const toRect = toEl.getBoundingClientRect();
+    const fromCol = NODES[f.from]?.col ?? 0;
+    const toCol = NODES[f.to]?.col ?? 0;
+    const forward = fromCol <= toCol;
+
+    let x1,y1,x2,y2;
+    if (forward) {
+      x1=fromRect.right-cRect.left+container.scrollLeft;
+      y1=fromRect.top+fromRect.height/2-cRect.top+container.scrollTop;
+      x2=toRect.left-cRect.left+container.scrollLeft;
+      y2=toRect.top+toRect.height/2-cRect.top+container.scrollTop;
+    } else {
+      x1=fromRect.left-cRect.left+container.scrollLeft;
+      y1=fromRect.top+fromRect.height/2-cRect.top+container.scrollTop;
+      x2=toRect.right-cRect.left+container.scrollLeft;
+      y2=toRect.top+toRect.height/2-cRect.top+container.scrollTop;
+    }
+
+    const pairKey = [f.from,f.to].sort().join('|');
+    const siblings = pairMap[pairKey];
+    const sibIdx = siblings.indexOf(idx);
+    const yOff = (-(siblings.length-1)*5/2) + sibIdx*5;
+    y1+=yOff; y2+=yOff;
+
+    const dx = Math.abs(x2-x1);
+    const cpOff = Math.max(dx*0.3,30);
+    let cp1x,cp1y,cp2x,cp2y;
+    if (forward) { cp1x=x1+cpOff;cp1y=y1;cp2x=x2-cpOff;cp2y=y2; }
+    else { cp1x=x1-cpOff;cp1y=y1;cp2x=x2+cpOff;cp2y=y2; }
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',`M${x1},${y1} C${cp1x},${cp1y} ${cp2x},${cp2y} ${x2},${y2}`);
+    path.setAttribute('class',`flow-path type-${f.type}`+(animated?(forward?' animated-fwd':' animated-bwd'):''));
+    path.setAttribute('stroke-width',sw);
+    path.setAttribute('opacity',opacity);
+    path.setAttribute('marker-end',`url(#ah-${f.type})`);
+    svg.appendChild(path);
+  });
+}
+
+// ===== SLIDEOVER =====
+const TYPE_LABELS = {mat:'Matières',info:'Information',fin:'Financier'};
+let soActiveTab = 'all';
+let soCurrentFlows = [];
+let soCurrentNode = null;
+let allGroupsOpen = true;
+
+function isLondoNode(id){ return id && id.startsWith('londo-'); }
+
+function avatarInitials(title){
+  return title.split(/[\s·\-\/]+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'?';
+}
+
+function buildFluxCardHTML(f, nodeId){
+  const srcId = f.from, tgtId = f.to;
+  const srcTitle = NODES[srcId]?.title || srcId;
+  const tgtTitle = NODES[tgtId]?.title || tgtId;
+  const t = f.type;
+  return `<div class="flux-card">
+    <div class="flux-card-top">
+      <span class="flux-type-tag ${t}"><span class="flux-type-dot ${t}"></span>${TYPE_LABELS[t]}</span>
+    </div>
+    <div class="flux-arrow-row">
+      <span class="flux-node-badge src${isLondoNode(srcId)?' is-londo':''}" title="${srcTitle}">${srcTitle}</span>
+      <div class="flux-connector">
+        <div class="flux-connector-line ${t}"></div>
+        <div class="flux-connector-head ${t}"></div>
+      </div>
+      <span class="flux-node-badge tgt${isLondoNode(tgtId)?' is-londo':''}" title="${tgtTitle}">${tgtTitle}</span>
+    </div>
+    <div class="flux-artifact">${f.label}</div>
+  </div>`;
+}
+
+function toggleGroup(header){
+  const g = header.closest('.entity-group');
+  const opening = !g.classList.contains('open');
+  g.classList.toggle('open');
+  header.setAttribute('aria-expanded', opening);
+}
+
+function toggleAllGroups(){
+  const groups = document.querySelectorAll('#so-body .entity-group');
+  const anyOpen = [...groups].some(g => g.classList.contains('open'));
+  groups.forEach(g => {
+    g.classList.toggle('open', !anyOpen);
+    g.querySelector('.entity-header')?.setAttribute('aria-expanded', !anyOpen);
+  });
+  allGroupsOpen = !anyOpen;
+  const btn = document.getElementById('so-expand-btn');
+  if(btn) btn.textContent = anyOpen ? 'Tout déplier' : 'Tout replier';
+}
+
+function typeDots(flows){
+  const types = [...new Set(flows.map(f=>f.type))];
+  const cols = {mat:'var(--coral)',info:'var(--blue)',fin:'var(--teal)'};
+  return types.map(t=>`<span class="entity-dot" style="background:${cols[t]}" title="${TYPE_LABELS[t]}"></span>`).join('');
+}
+
+function renderSoBody(tab){
+  soActiveTab = tab;
+  const node = NODES[soCurrentNode]; if (!node) return;
+  const flows = soCurrentFlows.filter(f => tab === 'all' || f.type === tab);
+
+  const groups = new Map();
+  flows.forEach(f => {
+    const partnerId = f.from === soCurrentNode ? f.to : f.from;
+    const key = partnerId;
+    if (!groups.has(key)) groups.set(key, {title: NODES[partnerId]?.title||partnerId, flows:[]});
+    groups.get(key).flows.push(f);
+  });
+
+  let html = `<div class="so-node-desc">${node.desc}</div>`;
+
+  if (!flows.length){
+    html += '<div style="padding:32px 20px;text-align:center;font-size:12px;color:var(--text-tertiary);">Aucun flux dans cette catégorie.</div>';
+  } else {
+    html += `<div class="so-toolbar">
+      <span class="so-count-label">${groups.size} entité${groups.size>1?'s':''} · ${flows.length} flux</span>
+      <button class="so-expand-btn" id="so-expand-btn" onclick="toggleAllGroups()">Tout replier</button>
+    </div><div class="so-groups">`;
+
+    groups.forEach((g, partnerId) => {
+      html += `<div class="entity-group open">
+        <div class="entity-header" onclick="toggleGroup(this)" role="button" tabindex="0" aria-expanded="true">
+          <div class="entity-name" title="${g.title}">${g.title}</div>
+          <div class="entity-badges">${typeDots(g.flows)}</div>
+          <span class="entity-flux-count">${g.flows.length}</span>
+          <span class="entity-chevron">▾</span>
+        </div>
+        <div class="entity-body">${g.flows.map(f=>buildFluxCardHTML(f, soCurrentNode)).join('')}</div>
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  if (node.risk){
+    html += `<div class="risk-section"><div class="risk-title">⚠ Risque / point d'attention</div><div class="risk-text">${node.risk}</div></div>`;
+  }
+
+  document.getElementById('so-body').innerHTML = html;
+  document.querySelectorAll('.entity-header').forEach(h => {
+    h.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggleGroup(h); }});
+  });
+  document.querySelectorAll('.so-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+}
+
+
+function openSlideover(id){
+  const node = NODES[id]; if (!node) return;
+  soCurrentNode = id;
+  soCurrentFlows = FLOWS.filter(f => f.from===id || f.to===id);
+  const counts = {mat:0, info:0, fin:0};
+  soCurrentFlows.forEach(f => counts[f.type]++);
+
+  document.getElementById('so-title').textContent = node.title;
+  document.getElementById('so-role').innerHTML = `<span class="role-badge ${node.roleClass}">${node.role}</span>`;
+
+  // Build tabs
+  const tabsEl = document.getElementById('so-tabs');
+  tabsEl.innerHTML = `
+    <span class="so-tab active" data-tab="all" onclick="renderSoBody('all')">Tous <span class="tab-count">${soCurrentFlows.length}</span></span>
+    <span class="so-tab" data-tab="mat" onclick="renderSoBody('mat')"><span class="tab-dot" style="background:var(--coral)"></span>Matières <span class="tab-count">${counts.mat}</span></span>
+    <span class="so-tab" data-tab="info" onclick="renderSoBody('info')"><span class="tab-dot" style="background:var(--blue)"></span>Information <span class="tab-count">${counts.info}</span></span>
+    <span class="so-tab" data-tab="fin" onclick="renderSoBody('fin')"><span class="tab-dot" style="background:var(--teal)"></span>Financier <span class="tab-count">${counts.fin}</span></span>
+  `;
+
+  soActiveTab = 'all';
+  renderSoBody('all');
+  document.getElementById('slideover').classList.add('open');
+  document.getElementById('backdrop').classList.add('open');
+}
+
+function closeSlideover(){
+  document.getElementById('slideover').classList.remove('open');
+  document.getElementById('backdrop').classList.remove('open');
+  if (selectedNode){ selectedNode=null; updateUI(); }
+}
+
+// ===== RESIZE HANDLE =====
+(function(){
+  const handle = document.getElementById('so-resize');
+  const panel = document.getElementById('slideover');
+  let dragging = false, startX = 0, startW = 0;
+  handle.addEventListener('mousedown', e => {
+    dragging = true; startX = e.clientX; startW = panel.offsetWidth;
+    handle.classList.add('dragging');
+    panel.classList.add('no-transition');
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const delta = startX - e.clientX;
+    const newW = Math.min(Math.max(startW + delta, 340), window.innerWidth * 0.9);
+    panel.style.width = newW + 'px';
+  });
+  document.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    handle.classList.remove('dragging');
+    panel.classList.remove('no-transition');
+    document.body.style.userSelect = '';
+  });
+  // Touch support
+  handle.addEventListener('touchstart', e => {
+    dragging = true; startX = e.touches[0].clientX; startW = panel.offsetWidth;
+    panel.classList.add('no-transition'); e.preventDefault();
+  }, {passive:false});
+  document.addEventListener('touchmove', e => {
+    if (!dragging) return;
+    const delta = startX - e.touches[0].clientX;
+    const newW = Math.min(Math.max(startW + delta, 340), window.innerWidth * 0.9);
+    panel.style.width = newW + 'px';
+  });
+  document.addEventListener('touchend', () => { dragging=false; panel.classList.remove('no-transition'); });
+})();
+</script>
+</body>
+</html>

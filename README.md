@@ -1,2 +1,2 @@
 # lnd-vc-map
-LONDO Technonolgy value chain map
+Draft VC Map
